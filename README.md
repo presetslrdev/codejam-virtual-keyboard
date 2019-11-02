@@ -1,2 +1,2 @@
 # codejam-virtual-keyboard
-init: start the codejam-canvas task
+init: start the codejam-virtual-keyboard task
