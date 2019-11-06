@@ -89,10 +89,10 @@ span + span {
 }
 
 .tab {
-    width: 125px;
+    width: 60px;
 }
 
-.enter, .capslock {
+.enter, .capslock, .lng {
     width: 77px;
 }
 
