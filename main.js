@@ -1,6 +1,7 @@
 let lang = localStorage.lang ? localStorage.lang : 'ru';
 let textBox = '';
 let capsLockState = false;
+const div = document.createElement('div');
 
 const keys = {
   en: [
@@ -198,6 +199,7 @@ function functionalButton(btn) {
     case 'capslock':
       capsLockState = !capsLockState;
       capsLockState ? document.querySelector('.capslock').classList.add('active') : document.querySelector('.capslock').classList.remove('active');
+      rebuildKeyboard();
       break;
     case 'shift':
     case 'alt':
@@ -206,6 +208,24 @@ function functionalButton(btn) {
     default:
       break;
   }
+}
+
+function createKeyboard(lang) {
+  div.className = 'keyboard';
+  for (let i = 0; keys[lang].length > i; i++) {
+    const ul = document.createElement('ul');
+    ul.className = keyClassName(i);
+    div.appendChild(ul);
+    Object.keys(keys[lang][i]).forEach((el) => {
+      const li = document.createElement('li');
+      li.innerHTML += `<a href="#" ${keys[lang][i][el].length > 0
+        ? (`class="${el.toLowerCase()}"`) : ('')}>${!Array.isArray(keys[lang][i][el])
+        ? capsLockState ? (`<span>${keys[lang][i][el].toUpperCase()}</span>`) : (`<span>${keys[lang][i][el]}</span>`)
+        : (`<span>${keys[lang][i][el][0]}</span>` + `<span>${keys[lang][i][el][1]}</span>`)}</a>`;
+      ul.appendChild(li);
+    });
+  }
+  document.body.append(div);
 }
 
 function keyClassName(keyLine) {
@@ -227,37 +247,39 @@ window.onload = function create() {
   const textArea = document.createElement('textarea');
   textArea.className = 'text';
   document.body.append(textArea);
-  const div = document.createElement('div');
-  div.className = 'keyboard';
-  for (let i = 0; keys[lang].length > i; i++) {
-    const ul = document.createElement('ul');
-    ul.className = keyClassName(i);
-    div.appendChild(ul);
-    Object.keys(keys[lang][i]).forEach((el) => {
-      const li = document.createElement('li');
-      li.innerHTML += `<a href="#" ${keys[lang][i][el].length > 0 ? (`class="${el.toLowerCase()}"`) : ('')}>${!Array.isArray(keys[lang][i][el]) ? (`<span>${keys[lang][i][el]}</span>`) : (`<span>${keys[lang][i][el][0]}</span>` + `<span>${keys[lang][i][el][1]}</span>`)}</a>`;
-      ul.appendChild(li);
-    });
-  }
-  document.body.append(div);
 
-  const list = document.querySelectorAll('a');
-  for (let i = 0; list.length > i; i++) {
-    list[i].onclick = function animations() {
-      const symbol = list[i].querySelector('span').textContent;
-      list[i].classList.add('animation');
-      if (symbol.length === 1) {
-        updateText(symbol);
-      } else {
-        functionalButton(symbol.toLowerCase());
+  createKeyboard(lang);
+
+  document.addEventListener('click', function (e) {
+    let target = '';
+    if (e.target.closest('li')) {
+      target = e.target.querySelector('span') ? e.target : e.target.closest('a');
+      if (target) {
+        const symbol = target.querySelector('span').textContent;
+        target.classList.add('animation');
+        if (symbol.length === 1) {
+          updateText(symbol);
+        } else {
+          functionalButton(symbol.toLowerCase());
+        }
+        setTimeout(() => {
+          target.classList.remove('animation');
+        }, 300);
       }
-      setTimeout(() => {
-        list[i].classList.remove('animation');
-      }, 300);
-    };
-  }
-  document.querySelector('.lng').onclick = function langSelected() {
-    localStorage.lang = lang === 'en' ? 'ru' : 'en';
-    lang = localStorage.lang;
-  };
+
+      if (target && target.classList.contains('lng') || target.closest('a').classList.contains('lng')) {
+        localStorage.lang = lang === 'en' ? 'ru' : 'en';
+        lang = localStorage.lang;
+        rebuildKeyboard();
+      }
+    }
+  });
 };
+
+function rebuildKeyboard() {
+  let clearElement = document.querySelector('.keyboard');
+  while (clearElement.firstChild) {
+    clearElement.removeChild(clearElement.firstChild);
+  }
+  createKeyboard(lang);
+}
