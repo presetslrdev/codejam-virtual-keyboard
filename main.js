@@ -247,6 +247,7 @@ window.onload = function create() {
   const textArea = document.createElement('textarea');
   textArea.className = 'text';
   document.body.append(textArea);
+  textArea.focus();
 
   createKeyboard(lang);
 
